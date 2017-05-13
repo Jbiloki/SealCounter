@@ -11,6 +11,13 @@ from scipy import misc
 
 from sklearn.ensemble import RandomForestClassifier
 
+import pandas as pd
+import glob
+import cv2
+
+import matplotlib.pyplot as plt
+#%matplotlib inline
+
 import os,sys
 from PIL import Image
 import numpy as np
@@ -73,5 +80,16 @@ def flatten(img):
 	img_wide = img.reshape(1,s)
 	return img_wide[0]
 
+
+def sealCV():
+	train_data = pd.read_csv('train.csv')
+	train_imgs = sorted(glob.glob('Train/*.jpg'))# key = lambda name: int(os.path.basename(name)[:-4]))
+	train_dot = sorted(glob.glob('Kaggle/TrainSmall2/TrainDotted/*.jpg'))# key = lambda name: int(os.path.baseename(name)[:-4]))
+	#submission = pd.read_csv('~/MachineLearning/KaggleCode/sample_submission.csv')
+	print(train_data.shape)
+	print('Number of Train Images: {:d}'.format(len(train_imgs)))
+	print('Number of Dotted-Train Images: {:d}'.format(len(train_dot)))
+	print(train_data.head(6))
 #preprocessImages()
-sealForrest()
+#sealForrest()
+sealCV()
