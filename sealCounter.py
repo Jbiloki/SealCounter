@@ -33,7 +33,7 @@ def preprocessImages():
 		img = rgb2gray(img)
 		#print(np.shape(img))	
 		#edges = filters.sobel(img)
-		gaus = filters.gaussian(img)
+		gaus = filters.gaussian(img, sigma=2, mode='wrap')
 		#sobel = filters.sobel_h(gaus)
 		#hog_image = hog(img)#, orientations = 8, pixels_per_cell=(16,16), cells_per_block(1,1), visualise=True)
 		#scipy.misc.imsave(imgDest + 'edges'+ filename , edges)
@@ -91,12 +91,12 @@ def sealCV():
 	print('Number of Train Images: {:d}'.format(len(train_imgs)))
 	print('Number of Dotted-Train Images: {:d}'.format(len(train_dot)))
 	print(train_data.head(6))
-	idx = 2
+	idx = 1
 	image = cv2.cvtColor(cv2.imread(train_imgs[idx]),cv2.COLOR_BGR2RGB)
 	image_dot = cv2.cvtColor(cv2.imread(train_dot[idx]),cv2.COLOR_BGR2RGB)
 	img = image[1350:1900, 3000:3400]
 	img_dot = image_dot[1350:1900, 3000:3400]
-	diff = cv2.absdiff(image_dot,image) #get the difference of the cropped images
+	diff = cv2.absdiff(img_dot,img) #get the difference of the cropped images
 	gray = cv2.cvtColor(diff, cv2.COLOR_RGB2GRAY)
 	ret, th1 = cv2.threshold(gray,0,255,cv2.THRESH_BINARY|cv2.THRESH_OTSU) #threash hold at 0 to further differentiate the ground from the seals
 	cnts = cv2.findContours(th1.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
