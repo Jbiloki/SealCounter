@@ -27,25 +27,26 @@ def preprocessImages():
 	start_time = time.time()
 	#imageFile = open('/home/cpsc/MachineLearning/ProcessedKaggle/', 'w+')
 	#print('yes', imageFile)
-	imgDest = '/home/cpsc/MachineLearning/ProcessedKaggle/'
-	for filename in os.listdir('/home/cpsc/MachineLearning/Train'):
-		img = imread('/home/cpsc/MachineLearning/Train/'+filename)
+	imgDest = '/home/cpsc/MachineLearning/ComputerVision/KaggleCode/ProcessedKaggle/'
+	for filename in os.listdir('/home/cpsc/MachineLearning/ComputerVision/KaggleCode/Train/'):
+		img = imread('Train/'+filename)
 		img = rgb2gray(img)
 		#print(np.shape(img))	
 		#edges = filters.sobel(img)
-		sobel = filters.sobel_h(img)
+		gaus = filters.gaussian(img)
+		sobel = filters.sobel_h(gaus)
 		#hog_image = hog(img)#, orientations = 8, pixels_per_cell=(16,16), cells_per_block(1,1), visualise=True)
 		#scipy.misc.imsave(imgDest + 'edges'+ filename , edges)
-		scipy.misc.imsave(imgDest + 'sobel'+ filename, sobel)
+		scipy.misc.imsave(imgDest + 'sobel+gause'+ filename, sobel)
 	print("--- %s seconds --- to preprocess" % (time.time()- start_time))
 
 def sealForrest():
 	data = np.array([],dtype=float)
 	target = np.array([],dtype=float)
 	start_time = time.time()
-	for filename in os.listdir('/home/cpsc/MachineLearning/ProcessedKaggle'):
+	for filename in os.listdir('/home/cpsc/MachineLearning/ComputerVision/KaggleCode/ProcessedKaggle'):
 		if('sobel' in filename):
-			img = imread('/home/cpsc/MachineLearning/ProcessedKaggle/'+filename)
+			img = imread('/home/cpsc/MachineLearning/ComputerVision/KaggleCode/ProcessedKaggle/'+filename)
 			img = img_to_matrix(img)
 			img = flatten(img)
 			data = np.append(data,img)
@@ -83,13 +84,25 @@ def flatten(img):
 
 def sealCV():
 	train_data = pd.read_csv('train.csv')
-	train_imgs = sorted(glob.glob('Train/*.jpg'))# key = lambda name: int(os.path.basename(name)[:-4]))
+	train_imgs = sorted(glob.glob('ProcessedKaggle/*.jpg'))# key = lambda name: int(os.path.basename(name)[:-4]))
 	train_dot = sorted(glob.glob('Kaggle/TrainSmall2/TrainDotted/*.jpg'))# key = lambda name: int(os.path.baseename(name)[:-4]))
 	#submission = pd.read_csv('~/MachineLearning/KaggleCode/sample_submission.csv')
 	print(train_data.shape)
 	print('Number of Train Images: {:d}'.format(len(train_imgs)))
 	print('Number of Dotted-Train Images: {:d}'.format(len(train_dot)))
 	print(train_data.head(6))
+	idx = 1
+	image = cv2.cvtColor(cv2.imread(train_imgs[idx]),cv2.COLOR_BGR2RGB)
+	image_dot = cv2.cvtColor(cv2.imread(train_dot[idx]),cv2.COLOR_BGR2RGB)
+	img = image[1350:1900, 3000:3400]
+	img_dot = image_dot[1350:1900, 3000:3400]
+	diff = cv2.absdiff(img,img_dot) #get the difference of the cropped images
+	gray = cv2.cvtColor(diff, cv2.COLOR_RGB2GRAY)
+	ret, th1 = cv2.threshold(gray,0,255,cv2.THRESH_BINARY|cv2.THRESH_OTSU) #threash hold at 0 to further differentiate the ground from the seals
+	cnts = cv2.findContours(th1.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
+	#print(cnts)
+	print("Sea Lions Found: {}".format(len(cnts)))
+	
 #preprocessImages()
 #sealForrest()
 sealCV()
